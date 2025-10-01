@@ -1,58 +1,49 @@
 import string
 
-def create_aristocrat_key(key_mapping):
+def create_decryption_table(key_mapping):
     """
-    Creates the encryption and decryption translation tables.
+    Creates the decryption translation table from the key mapping.
 
     Args:
-        key_mapping (dict): A dictionary where keys are plaintext letters
-                            and values are their ciphertext substitutions.
+        key_mapping (dict): A dictionary where keys are CIPHERTEXT letters
+                            and values are their PLAINTEXT substitutions.
 
     Returns:
-        tuple: (encryption_table, decryption_table)
+        str.maketrans table: The translation table for decryption.
     """
-    # Create the reverse mapping for decryption
-    rev_mapping = {v: k for k, v in key_mapping.items()}
+    # The key is already in the required format: Ciphertext -> Plaintext
+    return str.maketrans(key_mapping)
 
-    # Create translation tables
-    enc_table = str.maketrans(key_mapping)
-    dec_table = str.maketrans(rev_mapping)
-
-    return enc_table, dec_table
-
-def aristocrat_cipher(text, table):
+def aristocrat_decipher(ciphertext, table):
     """
-    Applies the cipher translation to the text.
+    Applies the cipher translation (decryption) to the ciphertext.
     """
-    # Convert text to uppercase before applying the translation
-    return text.upper().translate(table)
+    # Text is usually uppercase for these ciphers
+    return ciphertext.upper().translate(table)
 
-# --- Example Usage ---
+# --- USER INPUT SECTION ---
 
-# Define a substitution key (Plaintext -> Ciphertext)
-# This key is the 'code' for the cipher.
-# A common characteristic of Aristocrats is that no letter maps to itself.
-KEY = {
-    'A': 'M', 'B': 'N', 'C': 'O', 'D': 'P', 'E': 'Q',
-    'F': 'R', 'G': 'S', 'H': 'T', 'I': 'U', 'J': 'V',
-    'K': 'W', 'L': 'X', 'M': 'Y', 'N': 'Z', 'O': 'A',
-    'P': 'B', 'Q': 'C', 'R': 'D', 'S': 'E', 'T': 'F',
-    'U': 'G', 'V': 'H', 'W': 'I', 'X': 'J', 'Y': 'K',
-    'Z': 'L'
+# 1. Paste your ciphertext here (all caps, no spaces if possible, or keep spaces)
+CIPHERTEXT = "QXP KQL YQG UZGP XP Q ZQG JQZ" # Example: THIS IS NOT A REAL KEY
+
+# 2. Define the DECRYPTION key (Ciphertext letter -> Plaintext letter)
+# YOU MUST FIGURE OUT/PROVIDE THIS KEY for the code to work.
+# 'Q' maps to 'T', 'X' maps to 'H', etc.
+DECRYPTION_KEY = {
+    'Q': 'T', 'X': 'H', 'P': 'I', 'K': 'S', 'L': 'F',
+    'Y': 'A', 'G': 'R', 'U': 'E', 'Z': 'N', 'J': 'M',
+    # Continue mapping all 26 letters...
 }
 
-plaintext = "THIS IS A SECRET MESSAGE FOR YOU"
+# --- DECRYPTION ---
 
-# 1. Create the translation tables
-encrypt_table, decrypt_table = create_aristocrat_key(KEY)
+# 1. Create the translation table
+decryption_table = create_decryption_table(DECRYPTION_KEY)
 
-# 2. Encrypt the message
-ciphertext = aristocrat_cipher(plaintext, encrypt_table)
+# 2. Decrypt the message
+plaintext = aristocrat_decipher(CIPHERTEXT, decryption_table)
+
+# 3. Print the result
+print(f"Ciphertext: {CIPHERTEXT}")
+print(f"Decryption Key: {DECRYPTION_KEY}")
 print(f"Plaintext:  {plaintext}")
-print(f"Ciphertext: {ciphertext}")
-
-print("-" * 20)
-
-# 3. Decrypt the message
-decrypted_text = aristocrat_cipher(ciphertext, decrypt_table)
-print(f"Decrypted:  {decrypted_text}")
