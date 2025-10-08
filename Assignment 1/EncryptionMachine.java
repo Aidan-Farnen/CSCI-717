@@ -1,3 +1,10 @@
+/**
+ * File: EncryptionMachine.java
+ * Author: Aidan Farnen
+ * Date: October 7, 2025
+ * Description: This file contains an implementation of a caesar cipher encryption
+ * which takes a set of user input words and shifts them by a set amount
+ */
 package encryptionMachine;
 
 import java.util.Scanner;
@@ -18,6 +25,8 @@ public class EncryptionMachine {
      * Prompts user for input on the key and the number of words
      * they want to encrypt. Then calls encryptWord() for the key
      * and for each word they choose to enter
+     * 
+     * @param input the Scanner object used for reading user input
      */
     public static void promptEncryption(Scanner input) {
     	System.out.println("Welcome to the CSCI717 Encryption Machine Construction");
@@ -54,6 +63,9 @@ public class EncryptionMachine {
     /**
      * Encrypts an input letter by shifting it based on the SHIFT class constant.
      * Wraps around if necessary.
+     * 
+     * @param letterInput the letter to encrypt
+     * @return the encrypted letter
      */
     public static char encryptLetter(char letterInput) {
 
@@ -65,6 +77,9 @@ public class EncryptionMachine {
     /**
      * Encrypts an entire word by encrypting each letter individually
      * using the encryptLetter() method.
+     * 
+     * @param inputWord the word to encrypt
+     * @return the encrypted word
      */
     public static String encryptWord(String inputWord) {
         StringBuilder outputWord = new StringBuilder();	//create new string builder
