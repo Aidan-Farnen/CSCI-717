@@ -1,0 +1,6 @@
+with pytest, make tests for:
+data_loader.py
+	-test loading recipes
+	-test the recipes to docs
+ai_engine.py
+	-test indexing and querying
