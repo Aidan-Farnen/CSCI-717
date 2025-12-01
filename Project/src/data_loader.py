@@ -1,9 +1,37 @@
-# src/data_loader.py
+"""
+data_loader.py
+
+Module for loading and preprocessing the "Better Recipes for a Better Life" dataset.
+
+This module provides functions to:
+- Load the recipe CSV file and handle nested list/dictionary columns safely.
+- Clean and preprocess text fields for embedding-based AI applications.
+- Convert recipe DataFrame rows into a format suitable for AIEngine indexing.
+
+Main Functions:
+- load_better_recipes(path: str | pathlib.Path = DATA_DIR / "recipes.csv") -> pd.DataFrame
+    Loads the CSV dataset, parses nested columns, and creates combined text fields
+    for each recipe. Returns a cleaned pandas DataFrame.
+
+- recipes_to_docs(df: pd.DataFrame) -> List[Dict[str, str]]
+    Converts a DataFrame of recipes into a list of dictionaries suitable for 
+    embedding and similarity searches. Each dictionary includes fields like 'id',
+    'title', 'ingredients', 'directions', 'cuisine', 'rating', 'text', and 'url'.
+
+Dependencies:
+- pandas: for DataFrame manipulation
+- pathlib: for filesystem paths
+- ast: for safe evaluation of string representations of Python lists/dicts
+
+df = load_better_recipes("data/recipes.csv")
+docs = recipes_to_docs(df)
+print(docs[0]["title"], docs[0]["text"])
+"""
 from __future__ import annotations
-import pandas as pd
 import pathlib
 import ast
 from typing import List, Dict, Any
+import pandas as pd
 
 DATA_DIR = pathlib.Path(__file__).resolve().parents[1] / "data"
 
