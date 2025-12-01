@@ -1,0 +1,6 @@
+pandas
+numpy
+spacy
+sentence-transformers
+pytest
+pytest-cov
