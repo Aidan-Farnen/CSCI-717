@@ -116,3 +116,25 @@ def test_query_without_index_raises():
     engine = AIEngine()
     with pytest.raises(RuntimeError):
         engine.query("anything")
+
+def test_index_handles_corrupt_cache(tmp_path, monkeypatch, mock_model, sample_docs, capsys):
+    """Ensure the exception block runs when the cache file is corrupt."""
+
+    # Create a corrupt cache file (empty → EOFError)
+    cache_path = tmp_path / "embeddings.pkl"
+    cache_path.write_bytes(b"")  # empty file triggers EOFError
+
+    # Patch EMBED_CACHE to point to our corrupt file
+    monkeypatch.setattr("src.ai_engine.EMBED_CACHE", cache_path)
+
+    engine = AIEngine()
+
+    # Run index normally
+    engine.index(sample_docs, force_recompute=False)
+
+    # The exception block should have printed an error message
+    captured = capsys.readouterr().out
+    assert "Failed to load cached embeddings" in captured
+
+    # And embeddings should now be computed fresh
+    assert engine.embeddings is not None
