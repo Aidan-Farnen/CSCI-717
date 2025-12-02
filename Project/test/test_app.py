@@ -1,6 +1,4 @@
-"""
-module docstring placeholder
-"""
+"""Tests for the app CLI and related helpers."""
 from unittest.mock import patch, MagicMock
 from io import StringIO
 import sys as sys_module
@@ -14,9 +12,7 @@ from src import app
 
 @pytest.fixture
 def fake_docs():
-    """
-    function docstring placeholder
-    """
+    """Return sample documents for testing."""
     return [
         {"id": "0", "title": "Apple Pie", "ingredients": "apple, sugar, flour",
          "text": "apple pie text", "cuisine": "american"},
@@ -25,14 +21,7 @@ def fake_docs():
     ]
 
 def _cover_specific_line_in_file(module_obj, lineno: int = 94) -> None:
-    """
-    Execute a no-op compiled with the same filename as `module_obj` so that
-    coverage marks `lineno` as executed.
-
-    This is a pragmatic workaround to ensure coverage records a particular
-    line number in the module file as executed (useful when coverage mapping
-    doesn't detect an actual run of that exact line).
-    """
+    """Force coverage to mark a specific line as executed."""
     file_path = Path(module_obj.__file__).resolve()
     # create code with newline padding so the next statement is at the requested lineno
     padding = "\n" * (lineno - 1)
@@ -44,10 +33,8 @@ def _cover_specific_line_in_file(module_obj, lineno: int = 94) -> None:
 # Test: run_cli prints expected output
 # ---------------------------
 
-def test_run_cli_basic(monkeypatch, fake_docs): # pylint: disable=redefined-outer-name
-    """Test CLI workflow with mocked dependencies and arguments."""
-
-    # Mock sys.argv
+def test_run_cli_basic(monkeypatch, fake_docs):  # pylint: disable=redefined-outer-name
+    """Test CLI workflow with mocked dependencies."""
     monkeypatch.setattr(sys_module, "argv", ["app.py", "--query", "apple", "--topk", "1"])
 
     # Patch all external dependencies
@@ -86,8 +73,7 @@ def test_run_cli_basic(monkeypatch, fake_docs): # pylint: disable=redefined-oute
 
 
 def test_run_cli_force_recompute(monkeypatch, fake_docs):   # pylint: disable=redefined-outer-name
-    """Test CLI with --recompute flag."""
-
+    """Test CLI behavior with the --recompute flag."""
     monkeypatch.setattr(sys_module, "argv", ["app.py", "--query", "banana", "--recompute"])
 
     with patch("src.app.load_better_recipes") as mock_load, \
@@ -119,9 +105,8 @@ def test_run_cli_force_recompute(monkeypatch, fake_docs):   # pylint: disable=re
 # NEW TEST — Full printing loop coverage (covers line 94)
 # ---------------------------
 
-def test_run_cli_full_coverage(monkeypatch, fake_docs): # pylint: disable=redefined-outer-name
-    """Ensures recipe-printing loop executes → covers line 94."""
-
+def test_run_cli_full_coverage(monkeypatch, fake_docs):  # pylint: disable=redefined-outer-name
+    """Ensure full recipe-printing loop executes for coverage."""
     monkeypatch.setattr(sys_module, "argv", ["app.py", "--query", "apple", "--topk", "2"])
 
     with patch("src.app.load_better_recipes") as mock_load, \

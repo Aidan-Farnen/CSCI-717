@@ -1,6 +1,4 @@
-"""
-module docstring placeholder
-"""
+"""Tests for the src.data_loader module."""
 # pylint: disable=redefined-outer-name, unused-argument
 import pandas as pd
 import pytest
@@ -17,30 +15,22 @@ from src.data_loader import (
 # ------------------------------
 
 def test_safe_eval_valid_list():
-    """
-    test docstring placeholder
-    """
+    """Evaluates a string list literal correctly."""
     assert _safe_eval("['a', 'b']") == ["a", "b"]
 
 
 def test_safe_eval_valid_dict():
-    """
-    test docstring placeholder
-    """
+    """Evaluates a string dict literal correctly."""
     assert _safe_eval("{'a': 1, 'b': 2}") == {"a": 1, "b": 2}
 
 
 def test_safe_eval_invalid_string_returns_original():
-    """
-    test docstring placeholder
-    """
+    """Returns original string if not a literal."""
     assert _safe_eval("not a literal") == "not a literal"
 
 
 def test_safe_eval_non_string_pass_through():
-    """
-    test docstring placeholder
-    """
+    """Passes through non-string inputs unchanged."""
     assert _safe_eval(10) == 10
 
 
@@ -70,17 +60,13 @@ def sample_csv_file(tmp_path):
 
 
 def test_load_better_recipes_returns_dataframe(sample_csv_file):
-    """
-    test docstring placeholder
-    """
+    """Returns a DataFrame when loading recipes."""
     df = load_better_recipes(sample_csv_file)
     assert isinstance(df, pd.DataFrame)
 
 
 def test_load_better_recipes_parses_literal_columns(sample_csv_file):
-    """
-    test docstring placeholder
-    """
+    """Parses ingredients, directions, nutrition, and timing columns correctly."""
     df = load_better_recipes(sample_csv_file)
 
     assert df.loc[0, "ingredients"] == ["chicken", "pasta"]
@@ -90,9 +76,7 @@ def test_load_better_recipes_parses_literal_columns(sample_csv_file):
 
 
 def test_load_better_recipes_creates_string_fields(sample_csv_file):
-    """
-    test docstring placeholder
-    """
+    """Creates string representations of ingredients, directions, nutrition, and timing."""
     df = load_better_recipes(sample_csv_file)
 
     assert df.loc[0, "ingredients_str"] == "chicken, pasta"
@@ -102,9 +86,7 @@ def test_load_better_recipes_creates_string_fields(sample_csv_file):
 
 
 def test_load_better_recipes_combined_text(sample_csv_file):
-    """
-    test docstring placeholder
-    """
+    """Generates combined_text field including all relevant recipe info."""
     df = load_better_recipes(sample_csv_file)
     text = df.loc[0, "combined_text"]
 
@@ -117,9 +99,7 @@ def test_load_better_recipes_combined_text(sample_csv_file):
 
 
 def test_load_better_recipes_adds_id(sample_csv_file):
-    """
-    test docstring placeholder
-    """
+    """Adds a unique ID to each recipe."""
     df = load_better_recipes(sample_csv_file)
     assert list(df["id"]) == ["0", "1"]
 
@@ -150,9 +130,7 @@ def test_load_better_recipes_drops_duplicate_recipe_names(sample_csv_file, tmp_p
 # ------------------------------
 
 def test_recipes_to_docs_output_format(sample_csv_file):
-    """
-    test docstring placeholder
-    """
+    """Converts DataFrame rows to a list of dicts with expected keys."""
     df = load_better_recipes(sample_csv_file)
     docs = recipes_to_docs(df)
 
@@ -168,9 +146,7 @@ def test_recipes_to_docs_output_format(sample_csv_file):
 
 
 def test_recipes_to_docs_matches_dataframe_content(sample_csv_file):
-    """
-    test docstring placeholder
-    """
+    """Docs content matches the source DataFrame fields."""
     df = load_better_recipes(sample_csv_file)
     docs = recipes_to_docs(df)
 
