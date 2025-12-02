@@ -1,23 +1,23 @@
-# test/test_ai_engine.py
-import numpy as np
+"""Tests for the AIEngine indexing and query functionality."""
+# pylint: disable=redefined-outer-name, unused-argument
 import pickle
 import pytest
-from pathlib import Path
-
-from src.ai_engine import AIEngine, EMBED_CACHE
+import numpy as np
+from src import ai_engine
+from src.ai_engine import AIEngine
 
 
 # -------------------------------
 # Helpers to mock SentenceTransformer
 # -------------------------------
-class MockModel:
-    """A minimal fake embedding model for fast deterministic tests."""
+class MockModel:    # pylint: disable=too-few-public-methods
+    """Minimal fake embedding model for deterministic tests."""
 
     def __init__(self, name):
         self.name = name
 
     def encode(self, texts, convert_to_numpy=True, show_progress_bar=False):
-        # Return deterministic "embeddings": a numeric vector based on text length
+        """Return deterministic embeddings based on text length."""
         if isinstance(texts, str):
             texts = [texts]
         return np.array([[len(t)] for t in texts], dtype=float)
@@ -25,14 +25,16 @@ class MockModel:
 
 @pytest.fixture
 def mock_model(monkeypatch):
-    """Patch SentenceTransformer to avoid loading real models."""
-    from src import ai_engine
+    """Patch SentenceTransformer to use MockModel."""
+    def fake_sentence_transformer(name):
+        return MockModel(name)
 
-    monkeypatch.setattr(ai_engine, "SentenceTransformer", lambda name: MockModel(name))
+    monkeypatch.setattr(ai_engine, "SentenceTransformer", fake_sentence_transformer)
 
 
 @pytest.fixture
 def sample_docs():
+    """Return sample documents for testing."""
     return [
         {"id": "0", "text": "apple pie recipe"},
         {"id": "1", "text": "banana smoothie instructions"},
@@ -46,7 +48,6 @@ def sample_docs():
 
 def test_index_creates_embeddings(tmp_path, monkeypatch, mock_model, sample_docs):
     """Indexing should create embeddings and write cache."""
-    # Patch cache location to temporary directory
     cache_path = tmp_path / "embeddings.pkl"
     monkeypatch.setattr("src.ai_engine.EMBED_CACHE", cache_path)
 
@@ -64,14 +65,15 @@ def test_index_creates_embeddings(tmp_path, monkeypatch, mock_model, sample_docs
 
 
 def test_index_uses_cache_when_available(tmp_path, monkeypatch, mock_model, sample_docs):
-    """If cache exists, index() should skip recomputation."""
+    """Index should use cache if it exists."""
     cache_path = tmp_path / "embeddings.pkl"
     monkeypatch.setattr("src.ai_engine.EMBED_CACHE", cache_path)
 
     # Pre-create a fake cache file
     fake_embeddings = np.array([[1.0], [2.0], [3.0]])
     with open(cache_path, "wb") as f:
-        pickle.dump({"model": "all-MiniLM-L6-v2", "docs": sample_docs, "embeddings": fake_embeddings}, f)
+        pickle.dump({"model": "all-MiniLM-L6-v2", "docs": sample_docs,
+                     "embeddings": fake_embeddings}, f)
 
     engine = AIEngine()
     engine.index(sample_docs)
@@ -81,7 +83,7 @@ def test_index_uses_cache_when_available(tmp_path, monkeypatch, mock_model, samp
 
 
 def test_index_force_recompute_ignores_cache(tmp_path, monkeypatch, mock_model, sample_docs):
-    """force_recompute=True must ignore cache."""
+    """force_recompute=True must ignore cache and recompute embeddings."""
     cache_path = tmp_path / "embeddings.pkl"
     monkeypatch.setattr("src.ai_engine.EMBED_CACHE", cache_path)
 
@@ -113,16 +115,16 @@ def test_query_returns_ranked_results(monkeypatch, mock_model, sample_docs):
 
 
 def test_query_without_index_raises():
+    """Query without indexing should raise RuntimeError."""
     engine = AIEngine()
     with pytest.raises(RuntimeError):
         engine.query("anything")
 
-def test_index_handles_corrupt_cache(tmp_path, monkeypatch, mock_model, sample_docs, capsys):
-    """Ensure the exception block runs when the cache file is corrupt."""
 
-    # Create a corrupt cache file (empty → EOFError)
+def test_index_handles_corrupt_cache(tmp_path, monkeypatch, mock_model, sample_docs, capsys):
+    """Ensure indexing recomputes if cache file is corrupt."""
     cache_path = tmp_path / "embeddings.pkl"
-    cache_path.write_bytes(b"")  # empty file triggers EOFError
+    cache_path.write_bytes(b"")
 
     # Patch EMBED_CACHE to point to our corrupt file
     monkeypatch.setattr("src.ai_engine.EMBED_CACHE", cache_path)

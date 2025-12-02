@@ -1,4 +1,4 @@
-import pytest
+"""Tests for the nlp_utils.extract_keywords function."""
 from src import nlp_utils
 
 
@@ -7,15 +7,12 @@ from src import nlp_utils
 # ------------------------------
 
 def test_extract_keywords_empty_string():
-    assert nlp_utils.extract_keywords("") == []
+    """Empty string should return no keywords."""
+    assert not nlp_utils.extract_keywords("")
 
 
 def test_extract_keywords_simple_sentence():
-    """
-    spaCy should extract nouns, proper nouns, and adjectives.
-    The exact results may vary slightly between spaCy versions,
-    but for common sentences they are stable.
-    """
+    """Extracts nouns, proper nouns, and adjectives from a simple sentence."""
     text = "The quick brown fox jumps over the lazy dog."
     keywords = nlp_utils.extract_keywords(text)
 
@@ -25,6 +22,7 @@ def test_extract_keywords_simple_sentence():
 
 
 def test_extract_keywords_deduplication():
+    """Repeated words should appear only once in keywords."""
     text = "Apple apple APPLES banana banana"
     keywords = nlp_utils.extract_keywords(text)
 
@@ -34,6 +32,7 @@ def test_extract_keywords_deduplication():
 
 
 def test_extract_keywords_top_k_limit():
+    """Respects top_k limit when extracting keywords."""
     text = "red car fast car shiny car broken car cool car"
     keywords = nlp_utils.extract_keywords(text, top_k=2)
 
@@ -45,9 +44,7 @@ def test_extract_keywords_top_k_limit():
 # ------------------------------
 
 def test_extract_keywords_fallback(monkeypatch):
-    """
-    Monkeypatch `_nlp` to None to test fallback branch.
-    """
+    """Fallback mode returns filtered tokens when spaCy is unavailable."""
     monkeypatch.setattr(nlp_utils, "_nlp", None)
 
     text = "Hello world! This fallback mode extracts tokens."
@@ -65,6 +62,7 @@ def test_extract_keywords_fallback(monkeypatch):
 
 
 def test_extract_keywords_fallback_top_k(monkeypatch):
+    """Fallback mode respects top_k limit."""
     monkeypatch.setattr(nlp_utils, "_nlp", None)
 
     text = "one two three four five six seven eight nine ten eleven"

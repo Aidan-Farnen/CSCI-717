@@ -30,7 +30,7 @@ jobs:
 
     - name: Run Pylint
       run: |
-        pylint src
+        pylint src test
 
     - name: Run Pytest
       run: |
