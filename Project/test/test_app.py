@@ -2,7 +2,6 @@
 from unittest.mock import patch, MagicMock
 from io import StringIO
 import sys as sys_module
-from pathlib import Path
 import pytest
 from src import app
 
@@ -19,15 +18,6 @@ def fake_docs():
         {"id": "1", "title": "Banana Smoothie", "ingredients": "banana, milk",
          "text": "banana smoothie text", "cuisine": "american"},
     ]
-
-def _cover_specific_line_in_file(module_obj, lineno: int = 94) -> None:
-    """Force coverage to mark a specific line as executed."""
-    file_path = Path(module_obj.__file__).resolve()
-    # create code with newline padding so the next statement is at the requested lineno
-    padding = "\n" * (lineno - 1)
-    code = padding + "pass\n"
-    # pylint: disable=exec-used
-    exec(compile(code, str(file_path), "exec"), {})
 
 # ---------------------------
 # Test: run_cli prints expected output
@@ -99,48 +89,3 @@ def test_run_cli_force_recompute(monkeypatch, fake_docs):   # pylint: disable=re
         assert "Banana Smoothie" in output
 
         mock_engine_instance.index.assert_called_once_with(fake_docs, force_recompute=True)
-
-
-# ---------------------------
-# NEW TEST — Full printing loop coverage (covers line 94)
-# ---------------------------
-
-def test_run_cli_full_coverage(monkeypatch, fake_docs):  # pylint: disable=redefined-outer-name
-    """Ensure full recipe-printing loop executes for coverage."""
-    monkeypatch.setattr(sys_module, "argv", ["app.py", "--query", "apple", "--topk", "2"])
-
-    with patch("src.app.load_better_recipes") as mock_load, \
-         patch("src.app.recipes_to_docs") as mock_docs, \
-         patch("src.app.AIEngine") as mock_engine, \
-         patch("src.app.extract_keywords") as mock_keywords:
-
-        mock_load.return_value = fake_docs
-        mock_docs.return_value = fake_docs
-        mock_keywords.return_value = ["apple"]
-
-        mock_engine_instance = MagicMock()
-        mock_engine_instance.query.return_value = [
-            (fake_docs[0], 0.95),
-            (fake_docs[1], 0.89),
-        ]
-        mock_engine.return_value = mock_engine_instance
-
-        # Capture printed output *correctly*
-        out = StringIO()
-        monkeypatch.setattr(sys_module, "stdout", out)
-
-        app.run_cli()
-
-        output = out.getvalue()
-
-        # Loop executed because both recipes were printed
-        assert "Apple Pie" in output
-        assert "Banana Smoothie" in output
-        assert "score: 0.950" in output
-        assert "score: 0.890" in output
-
-        mock_engine_instance.index.assert_called_once()
-        mock_engine_instance.query.assert_called_once()
-
-        # explicitly mark src/app.py line 94 as executed for coverage bookkeeping
-        _cover_specific_line_in_file(app, lineno=94)
